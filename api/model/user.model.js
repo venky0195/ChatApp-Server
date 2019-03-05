@@ -97,14 +97,14 @@ userModel.prototype.forgotPassword = (data, callback) => {
       callback(err);
     } else {
       if (result !== null) {
-      //  console.log("model===>", result);
+        //  console.log("model===>", result);
         callback(null, result);
       } else {
         callback("incorrect mail");
       }
     }
   });
-}
+};
 userModel.prototype.updateUserPassword = (req, callback) => {
   let newPassword = bcrypt.hashSync(req.body.Password, saltRounds);
   console.log("new pass bcrypt--", newPassword);
@@ -120,4 +120,15 @@ userModel.prototype.updateUserPassword = (req, callback) => {
     }
   );
 };
+userModel.prototype.getAllUser = callback => {
+  user.find({}, (err, result) => {
+    if (err) {
+      callback(err);
+    } else {
+      console.log("In model====", result);
+      callback(null, result);
+    }
+  });
+};
+
 module.exports = new userModel();

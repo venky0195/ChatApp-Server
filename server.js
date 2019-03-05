@@ -4,6 +4,9 @@ const router = require("../Server/api/routes/router");
 const express = require("express");
 // Import Body parser
 var bodyParser = require("body-parser");
+
+const chatControllers = require("./api/controllers/chat.controllers");
+
 // create express app
 const app = express();
 
@@ -14,12 +17,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //To perform validations
-var expressValidator = require('express-validator')
+var expressValidator = require("express-validator");
 app.use(expressValidator());
 
 // Configuring the database
 const databaseConfig = require("../Server/configuration/database.configuration");
-require('dotenv').config();
+require("dotenv").config();
 // Import Mongoose
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
@@ -33,7 +36,7 @@ mongoose
     console.log("Successfully connected to the database");
   })
   .catch(err => {
-    console.log("Could not connect to the database. Exiting now...", err);
+    console.log("Could not connect to the database.", err);
     process.exit();
   });
 
@@ -48,7 +51,31 @@ app.get("/", (req, res) => {
 });
 
 // listen for requests
-app.listen(4000, () => {
+const server = app.listen(4000, () => {
   console.log("Server is listening on port 4000");
+});
+
+const io = require("socket.io").listen(server);
+console.log("socket is working");
+io.sockets.on("connection", function(socket) {
+  connections = [];
+  connections.push(socket);
+  console.log("user connected");
+  socket.on("new_msg", function(req) {
+    chatControllers.addMessage(req, (err, result) => {
+      if (err) {
+        console.log("error on server while receiving data");
+      }
+      io.emit(req.recieverId, result);
+      io.emit(req.senderId, result);
+    });
+  });
+});
+/**
+ * socket Disconnect
+ **/
+io.on("disconnect", function(data) {
+  connections.splice(connections.indexOf(socket), 1);
+  console.log("user disconnected");
 });
 module.exports = app;
