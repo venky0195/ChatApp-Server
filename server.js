@@ -1,10 +1,18 @@
+/******************************************************************************
+ *  @Purpose        : To create a server to connect with front end for getting 
+                     request and sending response to client
+ *  @file           : server.js        
+ *  @author         : Venkatesh G
+ *  @version        : v0.1
+ *  @since          : 05-03-2019
+ ******************************************************************************/
 // Import API routers
 const router = require("../Server/api/routes/router");
 // Import express
 const express = require("express");
 // Import Body parser
 var bodyParser = require("body-parser");
-
+// Import chat controllers
 const chatControllers = require("./api/controllers/chat.controllers");
 
 // create express app
@@ -54,9 +62,10 @@ app.get("/", (req, res) => {
 const server = app.listen(4000, () => {
   console.log("Server is listening on port 4000");
 });
-
+//Configure socket connection
 const io = require("socket.io").listen(server);
 console.log("socket is working");
+//to handle a connection of a client, so that you can publish (emit) events to that client. 
 io.sockets.on("connection", function(socket) {
   connections = [];
   connections.push(socket);
@@ -71,11 +80,3 @@ io.sockets.on("connection", function(socket) {
     });
   });
 });
-/**
- * socket Disconnect
- **/
-io.on("disconnect", function(data) {
-  connections.splice(connections.indexOf(socket), 1);
-  console.log("user disconnected");
-});
-module.exports = app;
